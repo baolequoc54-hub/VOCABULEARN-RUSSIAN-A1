@@ -1,0 +1,872 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VocabuLearn Russian — Theo chủ đề</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Unbounded:wght@400;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500&display=swap');
+
+  :root {
+    --bg: #0e0e0f;
+    --surface: #18181b;
+    --border: #2a2a2e;
+    --accent: #e8c547;
+    --accent2: #5b8cf7;
+    --accent3: #f77b5b;
+    --text: #e8e8e8;
+    --muted: #6b6b75;
+    --rus: #c8a8f0;
+    --eng: #a8d8c8;
+    --tag: #2a2a2e;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'IBM Plex Sans', sans-serif;
+    min-height: 100vh;
+  }
+
+  header {
+    padding: 2.5rem 2rem 1.5rem;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .title-row {
+    display: flex;
+    align-items: baseline;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  h1 {
+    font-family: 'Unbounded', sans-serif;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--accent);
+    letter-spacing: -0.02em;
+  }
+
+  .subtitle {
+    font-size: 0.85rem;
+    color: var(--muted);
+    font-family: 'IBM Plex Mono', monospace;
+  }
+
+  .stats {
+    display: flex;
+    gap: 1.5rem;
+    margin-top: 0.5rem;
+    flex-wrap: wrap;
+  }
+
+  .stat {
+    font-size: 0.78rem;
+    color: var(--muted);
+    font-family: 'IBM Plex Mono', monospace;
+  }
+
+  .stat span {
+    color: var(--accent);
+    font-weight: 500;
+  }
+
+  /* Filter bar */
+  .filter-bar {
+    padding: 1rem 2rem;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .filter-label {
+    font-size: 0.72rem;
+    color: var(--muted);
+    font-family: 'IBM Plex Mono', monospace;
+    margin-right: 0.25rem;
+  }
+
+  .filter-btn {
+    padding: 0.3rem 0.75rem;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--muted);
+    border-radius: 2px;
+    font-size: 0.72rem;
+    font-family: 'IBM Plex Mono', monospace;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .filter-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .filter-btn.active { background: var(--accent); color: #000; border-color: var(--accent); font-weight: 500; }
+
+  /* Search */
+  .search-wrap {
+    margin-left: auto;
+    position: relative;
+  }
+
+  .search-wrap input {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 0.3rem 0.75rem 0.3rem 1.75rem;
+    border-radius: 2px;
+    font-size: 0.78rem;
+    font-family: 'IBM Plex Mono', monospace;
+    width: 200px;
+    outline: none;
+  }
+
+  .search-wrap input:focus { border-color: var(--accent2); }
+  .search-wrap::before {
+    content: '⌕';
+    position: absolute;
+    left: 0.5rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--muted);
+    font-size: 0.9rem;
+    pointer-events: none;
+  }
+
+  /* Main layout */
+  .main {
+    padding: 1.5rem 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+
+  /* Category card */
+  .cat-card {
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    overflow: hidden;
+    transition: border-color 0.2s;
+  }
+
+  .cat-card:hover { border-color: #3a3a42; }
+
+  .cat-header {
+    padding: 0.9rem 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    cursor: pointer;
+    user-select: none;
+    background: var(--surface);
+    transition: background 0.15s;
+  }
+
+  .cat-header:hover { background: #1e1e22; }
+
+  .cat-icon { font-size: 1.1rem; }
+
+  .cat-name {
+    font-family: 'Unbounded', sans-serif;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--text);
+    flex: 1;
+  }
+
+  .cat-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .cat-count {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--muted);
+    background: var(--tag);
+    padding: 0.15rem 0.4rem;
+    border-radius: 2px;
+  }
+
+  .cat-type-badge {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.65rem;
+    padding: 0.15rem 0.4rem;
+    border-radius: 2px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .badge-noun { background: rgba(91,140,247,0.15); color: var(--accent2); }
+  .badge-verb { background: rgba(247,123,91,0.15); color: var(--accent3); }
+  .badge-adj  { background: rgba(200,168,240,0.15); color: var(--rus); }
+  .badge-mixed { background: rgba(232,197,71,0.15); color: var(--accent); }
+
+  .toggle-arrow {
+    color: var(--muted);
+    font-size: 0.7rem;
+    transition: transform 0.2s;
+  }
+
+  .cat-card.open .toggle-arrow { transform: rotate(90deg); }
+
+  /* Vocab grid */
+  .vocab-body {
+    display: none;
+    padding: 1rem 1.25rem 1.25rem;
+    border-top: 1px solid var(--border);
+    background: #111114;
+  }
+
+  .cat-card.open .vocab-body { display: block; }
+
+  .vocab-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 0.35rem;
+  }
+
+  .vocab-item {
+    display: flex;
+    align-items: baseline;
+    gap: 0.6rem;
+    padding: 0.4rem 0.6rem;
+    border-radius: 2px;
+    transition: background 0.1s;
+  }
+
+  .vocab-item:hover { background: var(--surface); }
+
+  .vocab-item.hidden { display: none; }
+
+  .rus-word {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.82rem;
+    color: var(--rus);
+    font-weight: 500;
+    min-width: 130px;
+    flex-shrink: 0;
+  }
+
+  .sep {
+    color: var(--muted);
+    font-size: 0.7rem;
+    flex-shrink: 0;
+  }
+
+  .eng-word {
+    font-size: 0.78rem;
+    color: var(--eng);
+    font-family: 'IBM Plex Mono', monospace;
+  }
+
+  /* No results */
+  .no-results {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: var(--muted);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.8rem;
+    display: none;
+  }
+
+  /* Cat hidden when search yields nothing */
+  .cat-card.search-hidden { display: none; }
+
+  /* Accent color per category via data attr */
+  .cat-card[data-color="yellow"] .cat-header { border-left: 3px solid var(--accent); }
+  .cat-card[data-color="blue"]   .cat-header { border-left: 3px solid var(--accent2); }
+  .cat-card[data-color="orange"] .cat-header { border-left: 3px solid var(--accent3); }
+  .cat-card[data-color="purple"] .cat-header { border-left: 3px solid var(--rus); }
+  .cat-card[data-color="green"]  .cat-header { border-left: 3px solid var(--eng); }
+
+  .expand-all-btn {
+    padding: 0.3rem 0.75rem;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--muted);
+    border-radius: 2px;
+    font-size: 0.72rem;
+    font-family: 'IBM Plex Mono', monospace;
+    cursor: pointer;
+    transition: all 0.15s;
+    margin-left: auto;
+  }
+  .expand-all-btn:hover { border-color: var(--accent); color: var(--accent); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="title-row">
+    <h1>VocabuLearn Russian</h1>
+    <span class="subtitle">// phân loại theo semantic field</span>
+  </div>
+  <div class="stats">
+    <div class="stat">Tổng từ: <span id="total-count">0</span></div>
+    <div class="stat">Chủ đề: <span id="cat-count">0</span></div>
+    <div class="stat">Đang hiện: <span id="visible-count">0</span></div>
+  </div>
+</header>
+
+<div class="filter-bar">
+  <span class="filter-label">LOẠI:</span>
+  <button class="filter-btn active" data-filter="all">Tất cả</button>
+  <button class="filter-btn" data-filter="noun">Danh từ</button>
+  <button class="filter-btn" data-filter="verb">Động từ</button>
+  <button class="filter-btn" data-filter="adj">Tính/Phó từ</button>
+  <button class="filter-btn" data-filter="mixed">Hỗn hợp</button>
+  <button class="expand-all-btn" id="expand-all-btn">▶ Mở tất cả</button>
+  <div class="search-wrap">
+    <input type="text" id="search-input" placeholder="tìm từ...">
+  </div>
+</div>
+
+<div class="main" id="main-container">
+  <div class="no-results" id="no-results">Không tìm thấy từ nào.</div>
+</div>
+
+<script>
+const CATEGORIES = [
+  {
+    id: "gia-dinh",
+    icon: "👨‍👩‍👧",
+    name: "Gia đình & Con người",
+    type: "noun",
+    color: "yellow",
+    words: [
+      ["мать","the mother"],["отец","the father"],["брат","the brother"],
+      ["сестра","the sister"],["дочь","the daughter"],["сын","the son"],
+      ["муж","the husband"],["жена","wife"],["мальчик","the boy"],
+      ["девушка, девочка","the girl"],["ребёнок","the child"],
+      ["дядя","the uncle"],["тётя","the aunt"],["семья","the family"],
+      ["друг","the friend"],["мужчина","the man"],["женщина","the woman"],
+      ["молодая женщина","the young lady"],["персона","the person"],
+      ["леди","the lady"],["покупатель","the buyer"],["продавец","the seller"],
+      ["учитель","the teacher"],["студент","the student"],["ученик","the pupil"],
+      ["рабочий","the workman"],["музыкант","the musician"],
+      ["писатель","the writer"],["рыбак","the fisherman"],
+      ["крестьянин","the peasant"],["служащий","the employee"],
+      ["бизнесмен","the businessman"],["путешественник","the traveler"],
+      ["пекарь","the baker"],["бакалейщик","the grocer"],
+      ["официантка","the waitress"],["доктор","the doctor"],
+      ["зубной врач","the dentist"],["полицейский","the policeman"],
+      ["парикмахер","the barber"],["пилот","the pilot"],
+      ["агент","the agent"],["посетитель","the visitor"],
+      ["господин / сэр","Sir, Mister"]
+    ]
+  },
+  {
+    id: "co-the",
+    icon: "🫀",
+    name: "Cơ thể & Sức khoẻ",
+    type: "noun",
+    color: "orange",
+    words: [
+      ["рука","the hand"],["нога","the leg / the foot"],["голова","the head"],
+      ["лицо","the face"],["глаз","the eye"],["зуб","the tooth"],
+      ["нос","the nose"],["уши","the ears"],["волосы","the hair"],
+      ["сердце","the heart"],["желудок","the stomach"],["болезнь","the illness"],
+      ["здоровье","the health"],["скорость","the speed"],
+      ["чувство","the feeling"]
+    ]
+  },
+  {
+    id: "nha-cua",
+    icon: "🏠",
+    name: "Nhà cửa & Đồ vật trong nhà",
+    type: "noun",
+    color: "blue",
+    words: [
+      ["дом","the home"],["комната","the room"],["кухня","the kitchen"],
+      ["гостиная","the living room"],["столовая","the dining room"],
+      ["ванная комната","the bathroom"],["окно","the window"],
+      ["дверь","the door"],["крыша","the roof"],["стул, кресло","the chair"],
+      ["стол","table"],["кровать","the bed"],["подушка","the pillow"],
+      ["лампа","the lamp"],["зеркало","the mirror"],["ключ","the key"],
+      ["замок","the castle / lock"],["лестница","the staircase"],
+      ["потолок","the ceiling"],["постельное бельё","the linen"],
+      ["простыня","the sheet (bed)"],["одеяло","the blanket"],
+      ["бумага","the paper"],["мыло","the soap"],["пепельница","the ashtray"]
+    ]
+  },
+  {
+    id: "thuc-an",
+    icon: "🍽️",
+    name: "Thức ăn & Đồ uống",
+    type: "noun",
+    color: "yellow",
+    words: [
+      ["завтрак","the breakfast"],["второй завтрак","the lunch"],
+      ["еда, пища","the meal"],["десерт","the dessert"],
+      ["хлеб","the bread"],["булочка","the roll"],["торт","the cake"],
+      ["омлет","the omelet"],["яйцо","the egg"],["мясо","the meat"],
+      ["говядина","the beef"],["телятина","the veal"],["курица","the chicken"],
+      ["рыба","the fish"],["суп","the soup"],["салат","the salad"],
+      ["масло","the butter"],["сыр","the cheese"],["молоко","the milk"],
+      ["сливки","the cream"],["яблоко","the apple"],["груша","the pear"],
+      ["персик","the peach"],["апельсин","the orange"],["лимон","the lemon"],
+      ["клубника","the strawberries"],["зелёный горошек","the green peas"],
+      ["фасоль","the beans"],["картофель","the potato"],
+      ["шпинат","the spinach"],["овощь","the vegetable"],
+      ["соль","the salt"],["перец","the pepper"],["масло растительное","the oil"],
+      ["вино","the wine"],["чай","the tea"],["кофе","the coffee"],
+      ["молоко","the milk"],["сок","the juice"],["вода","the water"],
+      ["мороженое","the ice cream"]
+    ]
+  },
+  {
+    id: "do-dung-an",
+    icon: "🥄",
+    name: "Đồ dùng bàn ăn & Nhà bếp",
+    type: "noun",
+    color: "green",
+    words: [
+      ["нож","the knife"],["вилка","the fork"],["ложка","the spoon"],
+      ["чашка","the cup"],["стакан","the glass (drinking)"],
+      ["тарелка / посуда","the dish"],["бутылка","the bottle"],
+      ["поднос","the tray"],["корзинка","the basket"]
+    ]
+  },
+  {
+    id: "thoi-tiet",
+    icon: "🌤️",
+    name: "Thời tiết & Thiên nhiên",
+    type: "noun",
+    color: "blue",
+    words: [
+      ["трава","the grass"],["луна","the moon"],["солнце","the sun"],
+      ["небо","the sky"],["звезда","the star"],["облако","the cloud"],
+      ["дождь","the rain"],["снег","the snow"],["огонь, пожар","the fire"],
+      ["лес","the forest"],["гора","the mountain"],["река","the river"],
+      ["море","the sea"],["холм","the hill"],["сад","the garden"],
+      ["дерево","the tree / the wood"],["камень","the stone"],
+      ["цветок","the flower"],["свет","the light"],["дым","the smoke"],
+      ["жара","the heat"]
+    ]
+  },
+  {
+    id: "thoi-gian",
+    icon: "📅",
+    name: "Thời gian: Ngày, Tháng, Mùa",
+    type: "noun",
+    color: "purple",
+    words: [
+      ["понедельник","Monday"],["вторник","Tuesday"],["среда","Wednesday"],
+      ["четверг","Thursday"],["пятница","Friday"],["суббота","Saturday"],
+      ["воскресенье","Sunday"],
+      ["январь","January"],["февраль","February"],["март","March"],
+      ["апрель","April"],["май","May"],["июнь","June"],
+      ["июль","July"],["август","August"],["сентябрь","September"],
+      ["октябрь","October"],["ноябрь","November"],["декабрь","December"],
+      ["весна","the spring"],["лето","the summer"],
+      ["осень","the autumn"],["зима","the winter"],
+      ["сезон, время года","the season"],
+      ["день","the day"],["ночь","the night"],["вечер","the evening"],
+      ["неделя","the week"],["год","the year"],["час","the hour"],
+      ["время","the time"],["следующий день","the next day"],
+      ["Рождество","Christmas"]
+    ]
+  },
+  {
+    id: "di-chuyen",
+    icon: "✈️",
+    name: "Đi lại & Giao thông",
+    type: "noun",
+    color: "orange",
+    words: [
+      ["автомобиль","the automobile"],["самолёт","the airplane"],
+      ["поезд","the train"],["автобус","the bus"],["метро","the subway"],
+      ["лодка","the boat"],["грузовик","the truck"],
+      ["аэропорт","the airport"],["станция","the station"],
+      ["улица","the street"],["дорога","the road"],["мост","the bridge"],
+      ["маршрут","the route"],["железная дорога","the railroad"],
+      ["тротуар","the sidewalk"],["пригород","the suburbs"],
+      ["багаж","the baggage"],["билет","the ticket"],
+      ["билетная касса","the ticket window"],["таможня","the Customs"],
+      ["приезд","the arrival"],["отъезд, отправление","the departure"],
+      ["путешествие","the voyage"],["тур","the tour"],
+      ["побережье","the coast"],["пляж","the beach"]
+    ]
+  },
+  {
+    id: "thanh-pho",
+    icon: "🏙️",
+    name: "Thành phố & Địa điểm",
+    type: "noun",
+    color: "blue",
+    words: [
+      ["город","the town, the city"],["деревня","the village"],
+      ["магазин","the shop"],["кинотеатр","the movie theater"],
+      ["аптека","the drugstore"],["книжный магазин","the bookstore"],
+      ["кондитерская","the pastry shop"],["пекарня","the bakery"],
+      ["рынок","the market"],["банк","the bank"],["школа","the school"],
+      ["средняя школа","the high school"],
+      ["почтовое отделение","the post office"],["почта","the mail"],
+      ["больница / доктор","the doctor"],["церковь","the church"],
+      ["собор","the cathedral"],["фонтан","the fountain"],
+      ["городское управление","the City Hall"],
+      ["плавательный бассейн","the swimming pool"],["парк / сад","the garden"],
+      ["витрина магазина","the shop window"],["учреждение","the office"],
+      ["фабрика","the factory"],["страна","the country"],
+      ["север","the north"],["юг","the south"],
+      ["восток","the east"],["запад","the west"]
+    ]
+  },
+  {
+    id: "quan-ao",
+    icon: "👗",
+    name: "Quần áo & Phụ kiện",
+    type: "noun",
+    color: "purple",
+    words: [
+      ["платье","the dress"],["пальто","the overcoat"],["плащ","the raincoat"],
+      ["рубашка","the shirt"],["туфель","the shoe"],
+      ["брюки, штаны","the trousers, the pants"],["шляпа","the hat"],
+      ["перчатки","the gloves"],["зонтик","the umbrella"],
+      ["шерсть","the wool"],["материал, материя","the fabric"],
+      ["кошелёк","the purse"],["бумажник","the wallet"],
+      ["карман","the pocket"],["одежда","the clothes"],
+      ["кредитная карта","the credit card"],["часы","the watch"],
+      ["драгоценность","the jewel"],["мода","the fashion"],
+    ]
+  },
+  {
+    id: "truong-hoc",
+    icon: "📚",
+    name: "Trường học & Học tập",
+    type: "noun",
+    color: "green",
+    words: [
+      ["книга","the book"],["карандаш","the pencil"],["ручка, перо","the pen"],
+      ["письмо","the letter"],["слово","the word"],["язык","the language"],
+      ["карта","the map"],["газета","the newspaper"],["журнал","the magazine"],
+      ["словарь","the dictionary"],["копия","the copy"],
+      ["урок","the lesson"],["упражнение","the exercise"],
+      ["вопрос","the question"],["пример","the example"],
+      ["правило","the rule"],["ошибка, вина","the mistake, the fault"],
+      ["программа","the program"],["курс","the course"],
+      ["радио","the radio"],["телевизор","the television"],
+    ]
+  },
+  {
+    id: "so-dem",
+    icon: "💰",
+    name: "Tiền bạc & Mua sắm",
+    type: "noun",
+    color: "yellow",
+    words: [
+      ["деньги","the money"],["цена / стоимость","the cost"],
+      ["счёт","the bill"],["работа","the work, the job"],
+      ["ценность","the value"],["подарок","the gift"],
+      ["почтовая марка","the postage stamp"],["газета","the newspaper"],
+    ]
+  },
+  {
+    id: "tinh-chat",
+    icon: "🎨",
+    name: "Màu sắc",
+    type: "adj",
+    color: "purple",
+    words: [
+      ["белый","white"],["чёрный","black"],["красный","red"],
+      ["синий","blue"],["зелёный","green"],["жёлтый","yellow"],
+      ["коричневый","brown"],["серый","gray"],["голубой","light blue"],
+      ["белокурый","blond"],["тёмный","dark"],["светлый","light"],
+    ]
+  },
+  {
+    id: "tinh-tu-mo-ta",
+    icon: "💬",
+    name: "Tính từ mô tả người",
+    type: "adj",
+    color: "purple",
+    words: [
+      ["хороший","good"],["плохой","bad"],["умный","smart"],
+      ["глупый","stupid"],["добрый, ласковый","kind, gentle"],
+      ["злой / сердитый","angry"],["весёлый","gay / cheerful"],
+      ["грустный / печальный","sad"],["нервный","nervous"],
+      ["спокойный","calm / quiet"],["занятый","busy"],
+      ["усталый","tired"],["здоровый","healthy"],
+      ["больной","sick"],["молодой","young"],["старый","old"],
+      ["высокий","tall / high"],["маленький","little, small"],
+      ["большой","big, large"],["толстый","thick / fat"],
+      ["тонкий","thin, slight"],["красивый","pretty"],
+      ["прекрасный","beautiful"],["уродливый","ugly"],
+      ["богатый","rich"],["бедный","poor"],["щедрый","generous"],
+      ["эгоистичный","selfish"],["честный","honest"],
+      ["ленивый","lazy"],["смелый","brave"],["трусливый","coward"],
+      ["влюбчивый","amorous"],["искренний","sincere"],
+      ["гордый","proud"],["умный","wise"],["серьёзный","serious"],
+      ["разговорчивый","talkative"],["осторожный","careful"],
+      ["ответственный","responsible"],["честолюбивый","ambitious"],
+    ]
+  },
+  {
+    id: "dong-tu-hanh-dong",
+    icon: "🏃",
+    name: "Động từ: Hành động cơ bản",
+    type: "verb",
+    color: "orange",
+    words: [
+      ["идти","to go"],["бежать","to run"],["ходить","to walk"],
+      ["летать","to fly"],["прыгать","to jump"],["плавать","to swim"],
+      ["нырять","to dive"],["ложиться","to lie down"],
+      ["стоять","to stand"],["сидеть","to sit"],
+      ["вставать","to get up"],["падать","to fall"],
+      ["поднимать","to raise / lift"],["бросать","to throw"],
+      ["схватывать","to grab"],["тянуть, тащить","to pull"],
+      ["толкать","to push"],["двигаться","to move"],
+    ]
+  },
+  {
+    id: "dong-tu-giao-tiep",
+    icon: "🗣️",
+    name: "Động từ: Giao tiếp & Cảm xúc",
+    type: "verb",
+    color: "orange",
+    words: [
+      ["говорить, рассказывать","to talk, to speak"],
+      ["слушать","to listen"],["слышать","to hear"],
+      ["понимать","to understand"],["знать","to know"],
+      ["спрашивать","to ask"],["отвечать","to answer"],
+      ["объяснять","to explain"],["сказать","to say"],
+      ["кричать","to scream / shout"],["шептать","to whisper"],
+      ["смеяться","to laugh"],["плакать","to cry"],
+      ["улыбаться","to smile"],["шутить","to joke"],
+      ["думать","to think"],["знать","to know"],
+      ["помнить","to remember"],["забывать","to forget"],
+      ["понимать","to understand"],["верить","to believe"],
+      ["надеяться","to hope"],["хотеть","to want"],
+      ["любить","to love"],["ненавидеть","to hate"],
+      ["бояться","to be afraid"],["беспокоиться","to worry"],
+      ["радоваться","to be glad"],["мечтать","to dream"],
+    ]
+  },
+  {
+    id: "dong-tu-sinh-hoat",
+    icon: "🏡",
+    name: "Động từ: Sinh hoạt hàng ngày",
+    type: "verb",
+    color: "orange",
+    words: [
+      ["есть, кушать","to eat"],["пить","to drink"],
+      ["готовить / варить","to cook"],["покупать","to buy"],
+      ["продавать","to sell"],["платить","to pay"],
+      ["работать","to work"],["отдыхать","to rest"],
+      ["спать","to sleep"],["читать","to read"],
+      ["писать","to write"],["рисовать, чертить","to draw"],
+      ["играть","to play"],["петь","to sing"],
+      ["танцевать","to dance"],["смотреть","to look / watch"],
+      ["мыть, купать","to bathe"],["чистить","to clean"],
+      ["утюжить","to iron"],["шить","to sew"],
+      ["готовиться","to prepare"],["одеваться","to dress"],
+      ["открывать","to open"],["закрывать","to close"],
+      ["звонить","to ring / call"],["посещать","to visit"],
+    ]
+  },
+  {
+    id: "dong-tu-di-lai",
+    icon: "🚗",
+    name: "Động từ: Đi lại & Du lịch",
+    type: "verb",
+    color: "orange",
+    words: [
+      ["приезжать","to arrive"],["уходить / уезжать","to leave"],
+      ["путешествовать","to travel"],["водить","to drive"],
+      ["летать","to fly"],["садиться в машину","to get in the car"],
+      ["приземляться","to land"],["резервировать","to reserve"],
+      ["платить","to pay"],["заказывать","to order"],
+    ]
+  },
+  {
+    id: "cam-xuc-trang-thai",
+    icon: "😊",
+    name: "Cảm xúc & Trạng thái",
+    type: "mixed",
+    color: "green",
+    words: [
+      ["любовь","the love"],["надежда","the hope"],["счастье","the happiness"],
+      ["удовольствие","the pleasure"],["радость","joy"],
+      ["память","the memory"],["чувство","the feeling"],
+      ["здоровье","the health"],["аппетит","the appetite"],
+      ["усталый","tired"],["счастливый","delighted"],
+      ["недовольный","discontented"],["нервный","nervous"],
+      ["сердитый","angry"],["весёлый","cheerful"],
+      ["грустный","sad"],["спокойный","calm"],
+    ]
+  },
+  {
+    id: "phap-trang-tu",
+    icon: "⚡",
+    name: "Trạng từ thông dụng",
+    type: "adj",
+    color: "blue",
+    words: [
+      ["здесь","here"],["там","there"],["везде","everywhere"],
+      ["где-то","somewhere"],["снаружи","outside"],["внутри","inside of"],
+      ["сейчас","now / right now"],["тогда","then"],["потом, позже","then, afterwards"],
+      ["уже","already"],["ещё","more / still"],["скоро","soon"],
+      ["вдруг","suddenly"],["сразу","at once"],["редко","rarely"],
+      ["часто","often"],["всегда","always"],["никогда","never"],
+      ["обычно","usually / generally"],["иногда","sometimes"],
+      ["быстро","rapidly / quickly"],["медленно","slowly"],
+      ["хорошо","well"],["плохо","bad"],["очень","very"],
+      ["почти","almost"],["достаточно","enough"],["слишком","too much"],
+      ["завтра","tomorrow"],["сегодня","today"],["давно","long time"],
+      ["рано","early"],["поздно","late"],
+    ]
+  },
+  {
+    id: "gioi-tu",
+    icon: "🔗",
+    name: "Giới từ & Liên từ",
+    type: "adj",
+    color: "green",
+    words: [
+      ["в","in"],["на","on, upon"],["под","under, underneath"],
+      ["за","behind / for"],["перед","before"],["после","after"],
+      ["между","between"],["около","near"],["вокруг","around"],
+      ["среди","among"],["через","through"],["с","with"],
+      ["без","without"],["для","for"],["к","to, at"],
+      ["по направлению","toward"],["вместо","instead of"],
+      ["несмотря на","in spite of"],["кроме","except"],
+      ["и","and"],["но","but"],["или","or"],["если","if, whether"],
+      ["потому что","because"],["как только","as soon as"],
+      ["когда","when"],["где","where"],["почему","why"],
+      ["как","how"],["кто","who (subject)"],["что","what (subject)"],
+    ]
+  },
+];
+
+// Render
+const container = document.getElementById('main-container');
+const noResults = document.getElementById('no-results');
+let currentFilter = 'all';
+
+function renderCategories(cats) {
+  // Remove existing cards
+  document.querySelectorAll('.cat-card').forEach(el => el.remove());
+  
+  cats.forEach(cat => {
+    const card = document.createElement('div');
+    card.className = 'cat-card';
+    card.dataset.type = cat.type;
+    card.dataset.color = cat.color;
+    card.dataset.id = cat.id;
+
+    const badgeClass = {noun:'badge-noun',verb:'badge-verb',adj:'badge-adj',mixed:'badge-mixed'}[cat.type];
+    const badgeLabel = {noun:'Danh từ',verb:'Động từ',adj:'Tính/Phó từ',mixed:'Hỗn hợp'}[cat.type];
+
+    card.innerHTML = `
+      <div class="cat-header" onclick="toggleCard(this)">
+        <span class="cat-icon">${cat.icon}</span>
+        <span class="cat-name">${cat.name}</span>
+        <div class="cat-meta">
+          <span class="cat-count">${cat.words.length} từ</span>
+          <span class="cat-type-badge ${badgeClass}">${badgeLabel}</span>
+        </div>
+        <span class="toggle-arrow">▶</span>
+      </div>
+      <div class="vocab-body">
+        <div class="vocab-grid">
+          ${cat.words.map(([rus, eng]) => `
+            <div class="vocab-item" data-rus="${rus.toLowerCase()}" data-eng="${eng.toLowerCase()}">
+              <span class="rus-word">${rus}</span>
+              <span class="sep">—</span>
+              <span class="eng-word">${eng}</span>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    `;
+    container.insertBefore(card, noResults);
+  });
+
+  updateCounts();
+}
+
+function toggleCard(header) {
+  const card = header.closest('.cat-card');
+  card.classList.toggle('open');
+}
+
+function updateCounts() {
+  const allCards = document.querySelectorAll('.cat-card:not(.search-hidden)');
+  let visibleWords = 0;
+  allCards.forEach(card => {
+    visibleWords += card.querySelectorAll('.vocab-item:not(.hidden)').length;
+  });
+  document.getElementById('total-count').textContent =
+    CATEGORIES.reduce((s,c)=>s+c.words.length,0);
+  document.getElementById('cat-count').textContent = allCards.length;
+  document.getElementById('visible-count').textContent = visibleWords;
+}
+
+// Filter by type
+document.querySelectorAll('.filter-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    currentFilter = btn.dataset.filter;
+    applyFilters();
+  });
+});
+
+function applyFilters() {
+  const searchVal = document.getElementById('search-input').value.toLowerCase().trim();
+  let anyVisible = false;
+
+  document.querySelectorAll('.cat-card').forEach(card => {
+    const typeMatch = currentFilter === 'all' || card.dataset.type === currentFilter;
+    if (!typeMatch) {
+      card.classList.add('search-hidden');
+      return;
+    }
+
+    if (searchVal) {
+      let cardHasMatch = false;
+      card.querySelectorAll('.vocab-item').forEach(item => {
+        const match = item.dataset.rus.includes(searchVal) || item.dataset.eng.includes(searchVal);
+        item.classList.toggle('hidden', !match);
+        if (match) cardHasMatch = true;
+      });
+      card.classList.toggle('search-hidden', !cardHasMatch);
+      if (cardHasMatch) { card.classList.add('open'); anyVisible = true; }
+    } else {
+      card.classList.remove('search-hidden');
+      card.querySelectorAll('.vocab-item').forEach(item => item.classList.remove('hidden'));
+      anyVisible = true;
+    }
+  });
+
+  noResults.style.display = anyVisible ? 'none' : 'block';
+  updateCounts();
+}
+
+document.getElementById('search-input').addEventListener('input', applyFilters);
+
+// Expand all
+let allExpanded = false;
+document.getElementById('expand-all-btn').addEventListener('click', function() {
+  allExpanded = !allExpanded;
+  document.querySelectorAll('.cat-card:not(.search-hidden)').forEach(card => {
+    card.classList.toggle('open', allExpanded);
+  });
+  this.textContent = allExpanded ? '▼ Thu tất cả' : '▶ Mở tất cả';
+});
+
+// Init
+renderCategories(CATEGORIES);
+</script>
+</body>
+</html>
